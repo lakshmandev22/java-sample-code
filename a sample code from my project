@@ -1,0 +1,80 @@
+package iott.co.in.adapter;
+
+import android.content.Context;
+import android.content.Intent;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
+import androidx.recyclerview.widget.RecyclerView;
+import com.bumptech.glide.Glide;
+import iott.co.in.R;
+import iott.co.in.ui.activity.EpisodesActivity;
+import iott.co.in.ui.activity.MovieDescriptionActivity;
+import iott.co.in.ui.home.MovieDetailsModel;
+
+import java.util.ArrayList;
+
+public class HomeCategoryAdapter extends RecyclerView.Adapter<HomeCategoryAdapter.MyView> {
+    private Context mContext;
+    private ArrayList<MovieDetailsModel> mostlyList = new ArrayList<>();
+
+    public HomeCategoryAdapter(Context mContext) {
+        this.mContext = mContext;
+    }
+
+    public void renewItems(ArrayList<MovieDetailsModel> recyclerItems) {
+        mostlyList = recyclerItems;
+        notifyDataSetChanged();
+    }
+
+    public static class MyView extends RecyclerView.ViewHolder {
+        public ImageView imageView;
+        public TextView textView;
+
+        public MyView(View view) {
+            super(view);
+            imageView = view.findViewById(R.id.ratedimage);
+            textView = view.findViewById(R.id.name);
+        }
+    }
+
+    @Override
+    public MyView onCreateViewHolder(ViewGroup parent, int viewType) {
+        View itemView = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.rating_items, parent, false);
+        return new MyView(itemView);
+    }
+
+    @Override
+    public void onBindViewHolder(MyView holder, int position) {
+        Glide.with(holder.imageView.getContext())
+                .load(mostlyList.get(position).getImg()).centerCrop()
+                .into(holder.imageView);
+        holder.textView.setText(mostlyList.get(position).getName());g
+        holder.itemView.setOnClickListener(v -> {
+            if (mostlyList.get(position).getCategory().equals("WebSeries") || mostlyList.get(position).getCategory().equals("Anime")) {
+                Intent intent = new Intent(mContext, EpisodesActivity.class);
+                intent.putExtra("WebSeries", mostlyList.get(position).getId());
+                mContext.startActivity(intent);
+            } else {
+                Intent intent = new Intent(mContext, MovieDescriptionActivity.class);
+                intent.putExtra("id", mostlyList.get(position).getId());
+                try {
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    mContext.startActivity(intent);
+                } catch (Exception e) {
+                    Log.e("IntentError", "Failed to start MovieDescriptionActivity", e);
+                }
+            }
+        });
+    }
+
+    @Override
+    public int getItemCount() {
+        return mostlyList.size();
+    }
+}
+
